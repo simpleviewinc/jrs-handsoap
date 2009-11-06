@@ -15,6 +15,7 @@ module Handsoap
       :httpclient => Drivers::HttpClientDriver,
       :http_client => Drivers::HttpClientDriver,
       :net_http => Drivers::NetHttpDriver,
+      :net_http_proxy => Drivers::NetHttpDriver,
     }
 
     def self.drivers

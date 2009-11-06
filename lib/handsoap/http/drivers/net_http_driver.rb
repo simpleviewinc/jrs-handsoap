@@ -9,6 +9,18 @@ module Handsoap
           require 'uri'
         end
 
+        def self.options=(options)
+          @options = options
+        end
+
+        def self.http
+          @options ||= {}
+          return @options[:proxy_address] ?
+          Net::HTTP::Proxy(@options[:proxy_address], @options[:proxy_port],
+                           @options[:proxy_user], @options[:proxy_pass]) :
+            Net::HTTP
+        end
+
         def send_http_request(request)
           url = request.url
           unless url.kind_of? ::URI::Generic
@@ -18,18 +30,18 @@ module Handsoap
           path = url.path_query
           http_request = case request.http_method
                          when :get
-                           Net::HTTP::Get.new(path)
+                           self.class.http::Get.new(path)
                          when :post
-                           Net::HTTP::Post.new(path)
+                           self.class.http::Post.new(path)
                          when :put
-                           Net::HTTP::Put.new(path)
+                           self.class.http::Put.new(path)
                          when :delete
-                           Net::HTTP::Delete.new(path)
+                           self.class.http::Delete.new(path)
                          else
                            raise "Unsupported request method #{request.http_method}"
                          end
                          
-          http_client = Net::HTTP.new(url.host, url.port)
+          http_client = self.class.http.new(url.host, url.port)
           
           #http_client.read_timeout = 120
           http_client.read_timeout = Handsoap.timeout

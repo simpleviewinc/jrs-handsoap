@@ -12,8 +12,16 @@ module Handsoap
   end
 
   def self.http_driver=(driver)
+    unless driver.kind_of?(Array)
+      options = nil
+    else
+      driver, options = driver.first, driver.last
+    end
+
     @http_driver = driver
-    Handsoap::Http.drivers[driver].load!
+    driver_class = Handsoap::Http.drivers[driver]
+    driver_class.load!
+    driver_class.options = options if options
     return driver
   end
 
@@ -217,6 +225,7 @@ module Handsoap
         on_before_dispatch
         request = make_http_request(self.uri, doc.to_s, headers)
         response = http_driver_instance.send_http_request(request)
+        before_parse_http_response(response)
         parse_http_response(response)
       end
     end
@@ -307,6 +316,13 @@ module Handsoap
     # You can override this to customize the http_client
     def on_after_create_http_request(http_request)
     end
+
+    # Hook that is called before the response is parsed.
+    #
+    # You can override this to fix known quirks before the document is parsed
+    def before_parse_http_response(response)
+    end
+
     # Hook that is called when there is a response.
     #
     # You can override this to register common namespaces, useful for parsing the document.
