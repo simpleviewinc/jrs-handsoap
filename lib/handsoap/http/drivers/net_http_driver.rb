@@ -47,6 +47,11 @@ module Handsoap
           http_client.read_timeout = Handsoap.timeout
           
           http_client.use_ssl = true if url.scheme == 'https'
+
+          # JRS-specific hack to allow us to request a specific version.
+          if defined?(SslVersionForcer) && (version = SslVersionForcer.version)
+            http_client.ssl_version = version
+          end
           
           if request.username && request.password
             # TODO: http://codesnippets.joyent.com/posts/show/1075
