@@ -48,9 +48,15 @@ module Handsoap
           
           http_client.use_ssl = true if url.scheme == 'https'
 
-          # JRS-specific hack to allow us to request a specific version.
-          if defined?(SslVersionForcer) && (version = SslVersionForcer.version)
-            http_client.ssl_version = version
+          # JRS-specific hack to allow us to set specific SSL config options.
+          if defined?(SslConfigForcer) && (config = SslConfigForcer.config)
+            if config[:version]
+              http_client.ssl_version = config[:version]
+            end
+
+            if config[:verify_mode]
+              http_client.verify_mode = config[:verify_mode]
+            end
           end
           
           if request.username && request.password
